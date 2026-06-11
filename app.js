@@ -15,6 +15,7 @@ function iniciarFormulario(tipo) {
   registroEmEdicao = null;
   configurarFormularioPorTipo(tipo);
   preencherCidades();
+  preencherEngenheiros();
   gerarSlotsDefoto();
   definirDataHoje();
   mostrarTela('tela-formulario');
@@ -52,6 +53,19 @@ function definirDataHoje() {
   const hoje = new Date().toISOString().split('T')[0];
   document.getElementById('data-checkin').value = hoje;
   document.getElementById('data-checkout').value = hoje;
+}
+
+// ─── ENGENHEIROS ─────────────────────────────────────────────
+
+function preencherEngenheiros() {
+  const sel = document.getElementById('engenheiro');
+  sel.innerHTML = '<option value="">Selecione o engenheiro</option>';
+  ENGENHEIROS.forEach(e => {
+    const opt = document.createElement('option');
+    opt.value = e.email;
+    opt.textContent = e.nome;
+    sel.appendChild(opt);
+  });
 }
 
 // ─── CIDADES E CENÁRIOS ───────────────────────────────────────
@@ -201,7 +215,8 @@ function coletarDados() {
     numero_cenario: cenarioObj ? cenarioObj.numero : '',
     codigo_cenario: cenarioObj ? cenarioObj.codigo : document.getElementById('codigo-cenario').value,
     supervisor: document.getElementById('supervisor').value.trim(),
-    engenheiro: document.getElementById('engenheiro').value.trim(),
+    engenheiro: (() => { const e = ENGENHEIROS.find(x => x.email === document.getElementById('engenheiro').value); return e ? e.nome : ''; })(),
+    email_engenheiro: document.getElementById('engenheiro').value,
     data_checkin: document.getElementById('data-checkin').value,
     data_checkout: document.getElementById('data-checkout').value,
     observacoes: document.getElementById('observacoes').value.trim(),
