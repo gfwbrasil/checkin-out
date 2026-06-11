@@ -53,13 +53,10 @@ header {
   align-items: center;
   gap: 2px;
 }
-.logo-globo { width: 44px; height: 22px; }
-.logo-texto {
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: .12em;
-  text-transform: lowercase;
-  color: rgba(255,255,255,0.9);
+.logo-img {
+  height: 36px;
+  width: auto;
+  object-fit: contain;
 }
 
 /* ─── TELAS ────────────────────────────────────────────────── */
