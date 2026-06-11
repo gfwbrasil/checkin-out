@@ -54,8 +54,8 @@ header {
   gap: 2px;
 }
 .logo-img {
-  height: 36px;
-  width: auto;
+  height: 48px;
+  width: 48px;
   object-fit: contain;
 }
 
