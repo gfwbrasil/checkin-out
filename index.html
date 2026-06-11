@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Check-in / Check-out de Cenários</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header>
+    <div class="header-left">
+      <h1>Manutenção de Cenários</h1>
+      <p class="subtitle">Registro de Check-in / Check-out</p>
+    </div>
+    <div class="header-logo">
+      <svg viewBox="0 0 80 40" xmlns="http://www.w3.org/2000/svg" class="logo-globo">
+        <ellipse cx="40" cy="20" rx="38" ry="18" fill="none" stroke="white" stroke-width="3"/>
+        <ellipse cx="40" cy="20" rx="18" ry="18" fill="none" stroke="white" stroke-width="3"/>
+        <line x1="2" y1="20" x2="78" y2="20" stroke="white" stroke-width="3"/>
+        <ellipse cx="40" cy="20" rx="38" ry="8" fill="none" stroke="white" stroke-width="1.5" stroke-dasharray="4 2"/>
+      </svg>
+      <span class="logo-texto">globo</span>
+    </div>
+  </header>
+
+  <main id="app">
+
+    <!-- TELA INICIAL -->
+    <section id="tela-inicio" class="tela ativa">
+      <div class="card-opcoes">
+        <button class="btn-tipo check-in" onclick="iniciarFormulario('checkin')">
+          <span class="icone">📋</span>
+          <strong>CHECK-IN</strong>
+          <small>Antes da montagem</small>
+        </button>
+        <button class="btn-tipo check-out" onclick="iniciarFormulario('checkout')">
+          <span class="icone">✅</span>
+          <strong>CHECK-OUT</strong>
+          <small>Após a desmontagem</small>
+        </button>
+      </div>
+      <button class="btn-secundario" onclick="verRegistros()">📁 Ver registros salvos</button>
+    </section>
+
+    <!-- FORMULÁRIO -->
+    <section id="tela-formulario" class="tela">
+      <div class="topo-form">
+        <button class="btn-voltar" onclick="voltarInicio()">← Voltar</button>
+        <h2 id="titulo-form">Check-in</h2>
+        <span id="badge-tipo" class="badge"></span>
+      </div>
+
+      <form id="form-checkin" onsubmit="return false;">
+
+        <fieldset>
+          <legend>Informações do Cenário</legend>
+          <label>Cidade Cenográfica *
+            <select id="cidade" required onchange="carregarCenarios()">
+              <option value="">Selecione a cidade</option>
+            </select>
+          </label>
+          <label>Cenário *
+            <select id="cenario" required>
+              <option value="">Selecione o cenário</option>
+            </select>
+          </label>
+          <label>Código do Cenário
+            <input type="text" id="codigo-cenario" readonly placeholder="Preenchido automaticamente" />
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Equipe</legend>
+          <label>Supervisor de Montagem *
+            <input type="text" id="supervisor" required placeholder="Nome do supervisor" autocomplete="name" />
+          </label>
+          <label>Engenheiro de Manutenção *
+            <input type="text" id="engenheiro" required placeholder="Nome do engenheiro" autocomplete="name" />
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Datas</legend>
+          <label id="label-data-checkin">Data do Check-in *
+            <input type="date" id="data-checkin" required />
+          </label>
+          <label id="label-data-checkout" style="display:none;">Data do Check-out *
+            <input type="date" id="data-checkout" />
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Observações</legend>
+          <label>Observações gerais
+            <textarea id="observacoes" rows="3" placeholder="Condições do cenário, itens com avaria, etc."></textarea>
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Registro Fotográfico <span class="contador-fotos" id="contador">0/10</span></legend>
+          <p class="dica">Toque em um quadro para tirar foto ou selecionar da galeria.</p>
+          <div class="grid-fotos" id="grid-fotos"></div>
+        </fieldset>
+
+        <div class="acoes-form">
+          <button type="button" class="btn-primario" onclick="salvarEGerarRelatorio()">
+            📄 Gerar Relatório
+          </button>
+          <button type="button" class="btn-secundario" onclick="salvarRascunho()">
+            💾 Salvar rascunho
+          </button>
+        </div>
+
+      </form>
+    </section>
+
+    <!-- RELATÓRIO -->
+    <section id="tela-relatorio" class="tela">
+      <div class="topo-form nao-imprime">
+        <button class="btn-voltar" onclick="voltarFormulario()">← Editar</button>
+        <h2>Relatório</h2>
+        <button class="btn-imprimir" onclick="window.print()">🖨️ Imprimir / PDF</button>
+      </div>
+      <div id="conteudo-relatorio"></div>
+    </section>
+
+    <!-- REGISTROS SALVOS -->
+    <section id="tela-registros" class="tela">
+      <div class="topo-form">
+        <button class="btn-voltar" onclick="voltarInicio()">← Voltar</button>
+        <h2>Registros Salvos</h2>
+      </div>
+      <div id="lista-registros"></div>
+    </section>
+
+  </main>
+
+  <div class="barra-colorida"></div>
+
+  <script src="dados.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
