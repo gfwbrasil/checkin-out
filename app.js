@@ -178,7 +178,7 @@ function atualizarContador() {
 // ─── VALIDAÇÃO ────────────────────────────────────────────────
 
 function validarFormulario() {
-  const campos = ['cidade', 'cenario', 'supervisor', 'engenheiro'];
+  const campos = ['cidade', 'cenario', 'supervisor', 'engenheiro', 'produto'];
   for (const id of campos) {
     const el = document.getElementById(id);
     if (!el.value.trim()) {
@@ -214,6 +214,7 @@ function coletarDados() {
     cenario: cenarioObj ? cenarioObj.nome : '',
     numero_cenario: cenarioObj ? cenarioObj.numero : '',
     codigo_cenario: cenarioObj ? cenarioObj.codigo : document.getElementById('codigo-cenario').value,
+    produto: document.getElementById('produto').value.trim(),
     supervisor: document.getElementById('supervisor').value.trim(),
     engenheiro: (() => { const e = ENGENHEIROS.find(x => x.email === document.getElementById('engenheiro').value); return e ? e.nome : ''; })(),
     email_engenheiro: document.getElementById('engenheiro').value,
@@ -252,92 +253,97 @@ function salvarEGerarRelatorio() {
   if (!validarFormulario()) return;
   const dados = coletarDados();
   dados.rascunho = false;
-  salvarNoStorage(dados);
+  // Tenta salvar, mas gera o relatório mesmo se o storage estiver cheio (fotos grandes)
+  try {
+    salvarNoStorage(dados);
+  } catch (e) {
+    // Salva sem as fotos para não perder os dados do formulário
+    try {
+      const semFotos = { ...dados, fotos: new Array(10).fill(null) };
+      salvarNoStorage(semFotos);
+    } catch (_) {}
+  }
   renderizarRelatorio(dados);
   mostrarTela('tela-relatorio');
 }
 
 function renderizarRelatorio(dados) {
-  const tipo = dados.tipo === 'checkin' ? 'CHECK-IN' : 'CHECK-OUT';
-  const dataFormatada = (iso) => {
-    if (!iso) return '—';
+  const fmt = (iso) => {
+    if (!iso) return '';
     const [y, m, d] = iso.split('-');
     return `${d}/${m}/${y}`;
   };
-  const dataRelatorio = dados.tipo === 'checkin' ? dataFormatada(dados.data_checkin) : dataFormatada(dados.data_checkout);
-  const fotos = dados.fotos.filter(f => f !== null);
 
-  let fotosHTML = '';
-  if (fotos.length > 0) {
-    fotosHTML = `<div class="fotos-relatorio">` +
-      fotos.map((f, i) => `
-        <div class="foto-item">
-          <img src="${f}" alt="Foto ${i + 1}" />
-          <span>Foto ${i + 1}</span>
-        </div>
-      `).join('') +
-      `</div>`;
-  } else {
-    fotosHTML = `<p class="sem-fotos">Nenhuma foto registrada.</p>`;
-  }
+  const fotos = (dados.fotos || []).map((f, i) => ({ src: f, idx: i })).filter(f => f.src !== null);
+  const fotosCheckin  = dados.tipo === 'checkin'  ? fotos : [];
+  const fotosCheckout = dados.tipo === 'checkout' ? fotos : [];
+
+  const colFotos = (lista) => {
+    if (lista.length === 0) return '<td class="col-fotos vazia"></td>';
+    return `<td class="col-fotos">${lista.map(f => `<img src="${f.src}" alt="Foto ${f.idx + 1}" />`).join('')}</td>`;
+  };
 
   document.getElementById('conteudo-relatorio').innerHTML = `
-    <div class="relatorio">
-      <div class="rel-cabecalho">
-        <div class="rel-logo">🎬</div>
-        <div>
-          <h1>Relatório de ${tipo}</h1>
-          <p class="rel-data-emissao">Emitido em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})}</p>
+    <div class="relatorio-pdf">
+
+      <div class="pdf-header">
+        <div class="pdf-header-logo-esq">
+          <span class="icone-manutencao">🔧</span>
         </div>
-        <span class="badge ${dados.tipo} grande">${tipo}</span>
+        <div class="pdf-header-titulo">
+          Manutenção de Cenários - Sets Multiuso
+        </div>
+        <div class="pdf-header-logo-dir">
+          <img src="logo_globo corporativa_restrita_branco.png" alt="Globo" />
+        </div>
       </div>
 
-      <table class="tabela-info">
+      <table class="pdf-info">
         <tr>
-          <th colspan="2">Informações do Cenário</th>
+          <td class="pdf-label">Cidade Cenográfica:</td>
+          <td class="pdf-valor">${dados.cidade || ''}</td>
+          <td class="pdf-label">PRODUTO</td>
+          <td class="pdf-valor">${dados.produto || ''}</td>
         </tr>
         <tr>
-          <td><strong>Cidade Cenográfica</strong></td>
-          <td>${dados.cidade} <small>(${dados.codigo_cidade})</small></td>
+          <td class="pdf-label">Cenário:</td>
+          <td class="pdf-valor">${dados.cenario || ''}</td>
+          <td class="pdf-label">Data Check-in</td>
+          <td class="pdf-valor">${fmt(dados.data_checkin)}</td>
         </tr>
         <tr>
-          <td><strong>Cenário</strong></td>
-          <td>${dados.cenario}</td>
+          <td class="pdf-label">Supervisor/Produtor:</td>
+          <td class="pdf-valor">${dados.supervisor || ''}</td>
+          <td class="pdf-label">Data Check-out</td>
+          <td class="pdf-valor">${fmt(dados.data_checkout)}</td>
         </tr>
-        <tr>
-          <td><strong>Código</strong></td>
-          <td>${dados.codigo_cenario}</td>
-        </tr>
-        <tr>
-          <th colspan="2">Equipe</th>
-        </tr>
-        <tr>
-          <td><strong>Supervisor de Montagem</strong></td>
-          <td>${dados.supervisor}</td>
-        </tr>
-        <tr>
-          <td><strong>Engenheiro de Manutenção</strong></td>
-          <td>${dados.engenheiro}</td>
-        </tr>
-        <tr>
-          <th colspan="2">Datas</th>
-        </tr>
-        ${dados.data_checkin ? `<tr><td><strong>Data do Check-in</strong></td><td>${dataFormatada(dados.data_checkin)}</td></tr>` : ''}
-        ${dados.data_checkout ? `<tr><td><strong>Data do Check-out</strong></td><td>${dataFormatada(dados.data_checkout)}</td></tr>` : ''}
-        ${dados.observacoes ? `
-        <tr>
-          <th colspan="2">Observações</th>
-        </tr>
-        <tr>
-          <td colspan="2">${dados.observacoes}</td>
+        ${dados.engenheiro ? `<tr>
+          <td class="pdf-label">Engenheiro de Manutenção:</td>
+          <td class="pdf-valor" colspan="3">${dados.engenheiro}</td>
+        </tr>` : ''}
+        ${dados.observacoes ? `<tr>
+          <td class="pdf-label">Observações:</td>
+          <td class="pdf-valor" colspan="3">${dados.observacoes}</td>
         </tr>` : ''}
       </table>
 
-      <h3 class="titulo-fotos">Registro Fotográfico (${fotos.length} foto${fotos.length !== 1 ? 's' : ''})</h3>
-      ${fotosHTML}
+      <table class="pdf-fotos">
+        <thead>
+          <tr>
+            <th>Check-in</th>
+            <th>Check-out</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            ${colFotos(fotosCheckin)}
+            ${colFotos(fotosCheckout)}
+          </tr>
+        </tbody>
+      </table>
 
-      <div class="rodape-relatorio">
-        <p>Documento gerado pelo sistema de Manutenção de Cenários</p>
+      <div class="pdf-rodape">
+        Emitido em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})}
       </div>
     </div>
   `;
