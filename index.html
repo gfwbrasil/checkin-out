@@ -65,6 +65,11 @@
           <label>Produto *
             <input type="text" id="produto" required placeholder="Ex: Microdramas, Altas Horas..." />
           </label>
+          <label>Conteúdo *
+            <select id="conteudo" required>
+              <option value="">Selecione o conteúdo</option>
+            </select>
+          </label>
         </fieldset>
 
         <fieldset>
@@ -91,8 +96,13 @@
 
         <fieldset>
           <legend>Observações</legend>
-          <label>Observações gerais
+          <label id="label-obs-checkin">Observações gerais
             <textarea id="observacoes" rows="3" placeholder="Condições do cenário, itens com avaria, etc."></textarea>
+          </label>
+          <label id="label-obs-checkout" style="display:none;">Observações Check-out
+            <select id="observacoes-checkout">
+              <option value="">Selecione a observação</option>
+            </select>
           </label>
         </fieldset>
 

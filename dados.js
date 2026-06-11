@@ -197,6 +197,33 @@ const BASE_CENARIOS = [
   },
 ];
 
+const CONTEUDOS = [
+  "18H - NOVA NOVELA 2026/2027",
+  "18H - NOVA NOVELA 2027",
+  "18H - A NOBREZA DO AMOR",
+  "19H – CORAÇÃO ACELERADO",
+  "19H - NOVA NOVELA 2026/2027",
+  "21H - QUEM AMA CUIDA",
+  "A VIAGEM - FILME",
+  "CALDEIRÃO 2026",
+  "DOMINGÃO 2026",
+  'FILME "ME ERRA"',
+  "FILME PEDRO E NINA",
+  "MICRODRAMA",
+  "PABLO E LUISÃO 2ª TEMPORADA",
+];
+
+const OBSERVACOES_CHECKOUT = [
+  "ADERENTE - LIMPEZA",
+  "ADERENTE - DRESSINGS",
+  "ADERENTE - CARACTERISTICAS ORIGINAIS",
+  "ADERENTE - CADEADOS/CHAVES",
+  "NAO ADERENTE - LIMPEZA",
+  "NAO ADERENTE - DRESSINGS",
+  "NAO ADERENTE - CARACTERISTICAS ORIGINAIS",
+  "NAO ADERENTE - CADEADOS/CHAVES",
+];
+
 const ENGENHEIROS = [
   { nome: "Jorge Henrique Silva", email: "jorge.henrique.silva@g.globo" },
   { nome: "Jairo Pama",           email: "jairo.pama@g.globo" },

@@ -16,6 +16,7 @@ function iniciarFormulario(tipo) {
   configurarFormularioPorTipo(tipo);
   preencherCidades();
   preencherEngenheiros();
+  preencherConteudos();
   gerarSlotsDefoto();
   definirDataHoje();
   mostrarTela('tela-formulario');
@@ -47,12 +48,41 @@ function configurarFormularioPorTipo(tipo) {
   document.getElementById('data-checkin').required = isCheckin;
   document.getElementById('label-data-checkout').style.display = isCheckin ? 'none' : '';
   document.getElementById('data-checkout').required = !isCheckin;
+
+  document.getElementById('label-obs-checkin').style.display = isCheckin ? '' : 'none';
+  document.getElementById('label-obs-checkout').style.display = isCheckin ? 'none' : '';
 }
 
 function definirDataHoje() {
   const hoje = new Date().toISOString().split('T')[0];
-  document.getElementById('data-checkin').value = hoje;
-  document.getElementById('data-checkout').value = hoje;
+  ['data-checkin', 'data-checkout'].forEach(id => {
+    const el = document.getElementById(id);
+    el.value = hoje;
+    el.min = hoje;
+    el.max = hoje;
+  });
+}
+
+// ─── CONTEÚDOS E OBSERVAÇÕES ─────────────────────────────────
+
+function preencherConteudos() {
+  const selC = document.getElementById('conteudo');
+  selC.innerHTML = '<option value="">Selecione o conteúdo</option>';
+  CONTEUDOS.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c;
+    opt.textContent = c;
+    selC.appendChild(opt);
+  });
+
+  const selO = document.getElementById('observacoes-checkout');
+  selO.innerHTML = '<option value="">Selecione a observação</option>';
+  OBSERVACOES_CHECKOUT.forEach(o => {
+    const opt = document.createElement('option');
+    opt.value = o;
+    opt.textContent = o;
+    selO.appendChild(opt);
+  });
 }
 
 // ─── ENGENHEIROS ─────────────────────────────────────────────
@@ -178,7 +208,7 @@ function atualizarContador() {
 // ─── VALIDAÇÃO ────────────────────────────────────────────────
 
 function validarFormulario() {
-  const campos = ['cidade', 'cenario', 'supervisor', 'engenheiro', 'produto'];
+  const campos = ['cidade', 'cenario', 'supervisor', 'engenheiro', 'produto', 'conteudo'];
   for (const id of campos) {
     const el = document.getElementById(id);
     if (!el.value.trim()) {
@@ -215,12 +245,15 @@ function coletarDados() {
     numero_cenario: cenarioObj ? cenarioObj.numero : '',
     codigo_cenario: cenarioObj ? cenarioObj.codigo : document.getElementById('codigo-cenario').value,
     produto: document.getElementById('produto').value.trim(),
+    conteudo: document.getElementById('conteudo').value,
     supervisor: document.getElementById('supervisor').value.trim(),
     engenheiro: (() => { const e = ENGENHEIROS.find(x => x.email === document.getElementById('engenheiro').value); return e ? e.nome : ''; })(),
     email_engenheiro: document.getElementById('engenheiro').value,
     data_checkin: document.getElementById('data-checkin').value,
     data_checkout: document.getElementById('data-checkout').value,
-    observacoes: document.getElementById('observacoes').value.trim(),
+    observacoes: tipoAtual === 'checkout'
+      ? document.getElementById('observacoes-checkout').value
+      : document.getElementById('observacoes').value.trim(),
     fotos: [...fotosBase64],
     criado_em: new Date().toISOString()
   };
@@ -302,8 +335,8 @@ function renderizarRelatorio(dados) {
         <tr>
           <td class="pdf-label">Cidade Cenográfica:</td>
           <td class="pdf-valor">${dados.cidade || ''}</td>
-          <td class="pdf-label">PRODUTO</td>
-          <td class="pdf-valor">${dados.produto || ''}</td>
+          <td class="pdf-label">CONTEÚDO</td>
+          <td class="pdf-valor">${dados.conteudo || dados.produto || ''}</td>
         </tr>
         <tr>
           <td class="pdf-label">Cenário:</td>
