@@ -76,7 +76,7 @@ function preencherConteudos() {
   });
 
   const selO = document.getElementById('observacoes-checkout');
-  selO.innerHTML = '<option value="">Selecione a observação</option>';
+  selO.innerHTML = '';
   OBSERVACOES_CHECKOUT.forEach(o => {
     const opt = document.createElement('option');
     opt.value = o;
@@ -252,7 +252,7 @@ function coletarDados() {
     data_checkin: document.getElementById('data-checkin').value,
     data_checkout: document.getElementById('data-checkout').value,
     observacoes: tipoAtual === 'checkout'
-      ? document.getElementById('observacoes-checkout').value
+      ? Array.from(document.getElementById('observacoes-checkout').selectedOptions).map(o => o.value).join(' | ')
       : document.getElementById('observacoes').value.trim(),
     fotos: [...fotosBase64],
     criado_em: new Date().toISOString()

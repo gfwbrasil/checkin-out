@@ -48,7 +48,7 @@
       <form id="form-checkin" onsubmit="return false;">
 
         <fieldset>
-          <legend>Informações do Cenário</legend>
+          <legend>Informações da Reserva</legend>
           <label>Cidade Cenográfica *
             <select id="cidade" required onchange="carregarCenarios()">
               <option value="">Selecione a cidade</option>
@@ -77,9 +77,9 @@
           <label>Supervisor de Montagem *
             <input type="text" id="supervisor" required placeholder="Nome do supervisor" autocomplete="name" />
           </label>
-          <label>Engenheiro de Manutenção *
+          <label>Engenheiro(a) de Manutenção *
             <select id="engenheiro" required>
-              <option value="">Selecione o engenheiro</option>
+              <option value="">Selecione o engenheiro(a)</option>
             </select>
           </label>
         </fieldset>
@@ -100,8 +100,8 @@
             <textarea id="observacoes" rows="3" placeholder="Condições do cenário, itens com avaria, etc."></textarea>
           </label>
           <label id="label-obs-checkout" style="display:none;">Observações Check-out
-            <select id="observacoes-checkout">
-              <option value="">Selecione a observação</option>
+            <p class="dica">Toque e segure para selecionar mais de uma opção.</p>
+            <select id="observacoes-checkout" multiple size="8">
             </select>
           </label>
         </fieldset>
