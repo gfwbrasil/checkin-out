@@ -1,5 +1,5 @@
 let tipoAtual = 'checkin';
-let fotosBase64 = new Array(10).fill(null);
+let fotosBase64 = [];
 let registroEmEdicao = null;
 let checkinVinculado = null;
 
@@ -12,7 +12,7 @@ function mostrarTela(id) {
 
 function iniciarFormulario(tipo) {
   tipoAtual = tipo;
-  fotosBase64 = new Array(10).fill(null);
+  fotosBase64 = [];
   registroEmEdicao = null;
   checkinVinculado = null;
   configurarFormularioPorTipo(tipo);
@@ -183,28 +183,15 @@ function carregarCenarios() {
   };
 }
 
-// ─── SLOTS DE FOTO ────────────────────────────────────────────
+// ─── FOTOS ────────────────────────────────────────────────────
+
+const MAX_FOTOS = 30;
 
 function gerarSlotsDePhoto() { gerarSlotsDefoto(); }
 
 function gerarSlotsDefoto() {
-  const grid = document.getElementById('grid-fotos');
-  grid.innerHTML = '';
-  for (let i = 0; i < 10; i++) {
-    const slot = document.createElement('div');
-    slot.className = 'slot-foto';
-    slot.id = `slot-${i}`;
-    slot.innerHTML = `
-      <input type="file" accept="image/*" capture="environment"
-             id="input-foto-${i}" style="display:none"
-             onchange="carregarFoto(event, ${i})" />
-      <label for="input-foto-${i}" class="label-foto">
-        <span class="num-foto">${i + 1}</span>
-        <span class="icone-add">📷</span>
-      </label>
-    `;
-    grid.appendChild(slot);
-  }
+  fotosBase64 = [];
+  document.getElementById('grid-fotos').innerHTML = '';
   atualizarContador();
 }
 
@@ -255,48 +242,63 @@ function comprimirFoto(base64) {
   });
 }
 
-function carregarFoto(event, idx) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    fotosBase64[idx] = await comprimirFoto(e.target.result);
-    renderizarSlot(idx);
-    atualizarContador();
-  };
-  reader.readAsDataURL(file);
+function lerArquivo(file) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.readAsDataURL(file);
+  });
 }
 
-function renderizarSlot(idx) {
-  const slot = document.getElementById(`slot-${idx}`);
-  if (fotosBase64[idx]) {
-    slot.innerHTML = `
-      <img src="${fotosBase64[idx]}" alt="Foto ${idx + 1}" onclick="removerFoto(${idx})" />
-      <button class="btn-remover-foto" onclick="removerFoto(${idx})" title="Remover foto">✕</button>
-      <span class="num-foto-sobre">${idx + 1}</span>
-    `;
-  } else {
-    slot.innerHTML = `
-      <input type="file" accept="image/*" capture="environment"
-             id="input-foto-${idx}" style="display:none"
-             onchange="carregarFoto(event, ${idx})" />
-      <label for="input-foto-${idx}" class="label-foto">
-        <span class="num-foto">${idx + 1}</span>
-        <span class="icone-add">📷</span>
-      </label>
-    `;
+async function carregarFotos(event) {
+  const files = Array.from(event.target.files);
+  event.target.value = '';
+  if (!files.length) return;
+
+  const livres = MAX_FOTOS - fotosBase64.length;
+  if (livres <= 0) return;
+  const selecionados = files.slice(0, livres);
+  if (files.length > livres) {
+    alert(`Limite de ${MAX_FOTOS} fotos atingido. Apenas ${livres} foto(s) adicionada(s).`);
   }
+
+  for (const file of selecionados) {
+    const base64 = await lerArquivo(file);
+    const comprimida = await comprimirFoto(base64);
+    const idx = fotosBase64.push(comprimida) - 1;
+    adicionarSlotNaGrid(idx, comprimida);
+  }
+  atualizarContador();
+}
+
+function adicionarSlotNaGrid(idx, src) {
+  const grid = document.getElementById('grid-fotos');
+  const div = document.createElement('div');
+  div.className = 'slot-foto';
+  div.id = `slot-${idx}`;
+  div.innerHTML = `
+    <img src="${src}" alt="Foto ${idx + 1}" />
+    <button class="btn-remover-foto" onclick="removerFoto(${idx})" title="Remover">✕</button>
+    <span class="num-foto-sobre">${idx + 1}</span>
+  `;
+  grid.appendChild(div);
+}
+
+function renderizarGrid() {
+  document.getElementById('grid-fotos').innerHTML = '';
+  fotosBase64.forEach((src, idx) => adicionarSlotNaGrid(idx, src));
 }
 
 function removerFoto(idx) {
-  fotosBase64[idx] = null;
-  renderizarSlot(idx);
+  fotosBase64.splice(idx, 1);
+  renderizarGrid();
   atualizarContador();
 }
 
 function atualizarContador() {
-  const total = fotosBase64.filter(f => f !== null).length;
-  document.getElementById('contador').textContent = `${total}/10`;
+  document.getElementById('contador').textContent = `${fotosBase64.length}/${MAX_FOTOS}`;
+  const btn = document.getElementById('btn-add-foto');
+  if (btn) btn.style.display = fotosBase64.length >= MAX_FOTOS ? 'none' : '';
 }
 
 // ─── VALIDAÇÃO ────────────────────────────────────────────────

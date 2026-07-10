@@ -309,6 +309,20 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) opacit
   text-shadow: 0 1px 3px rgba(0,0,0,.9);
 }
 
+.btn-add-foto {
+  width: 100%;
+  margin-top: 10px;
+  padding: 13px;
+  background: rgba(100,181,246,0.15);
+  border: 1.5px dashed rgba(100,181,246,0.55);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: background .2s;
+}
+.btn-add-foto:hover { background: rgba(100,181,246,0.28); }
+
 /* ─── AÇÕES DO FORMULÁRIO ──────────────────────────────────── */
 .acoes-form { margin-top: 20px; }
 
