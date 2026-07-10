@@ -65,9 +65,9 @@ header {
 
 /* ─── TELA INICIAL ─────────────────────────────────────────── */
 .card-opcoes {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
   margin: 14px 0 10px;
 }
 
@@ -75,8 +75,8 @@ header {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
-  padding: 18px 10px;
+  gap: 0;
+  padding: 10px;
   border: 1px solid var(--card-border);
   border-radius: var(--radius);
   cursor: pointer;
@@ -540,5 +540,4 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) opacit
 /* ─── MOBILE REFINEMENTS ───────────────────────────────────── */
 @media (max-width: 360px) {
   .grid-fotos { grid-template-columns: repeat(2, 1fr); }
-  .card-opcoes { grid-template-columns: 1fr; }
 }
