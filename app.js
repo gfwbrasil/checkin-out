@@ -208,12 +208,31 @@ function gerarSlotsDefoto() {
   atualizarContador();
 }
 
+function comprimirFoto(base64) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 1200;
+      let w = img.width, h = img.height;
+      if (w > MAX || h > MAX) {
+        if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+        else       { w = Math.round(w * MAX / h); h = MAX; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', 0.75));
+    };
+    img.src = base64;
+  });
+}
+
 function carregarFoto(event, idx) {
   const file = event.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = (e) => {
-    fotosBase64[idx] = e.target.result;
+  reader.onload = async (e) => {
+    fotosBase64[idx] = await comprimirFoto(e.target.result);
     renderizarSlot(idx);
     atualizarContador();
   };
