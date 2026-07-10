@@ -3,6 +3,27 @@
 
 const BASE_CENARIOS = [
   {
+    cidade: "Aeroporto Multiuso",
+    codigo_cidade: "AERO",
+    cenarios: [
+      { nome: "AEROPORTO MULTIUSO", numero: "—", codigo: "AERO-001" },
+    ]
+  },
+  {
+    cidade: "Avião Multiuso",
+    codigo_cidade: "AVIA",
+    cenarios: [
+      { nome: "AVIÃO MULTIUSO", numero: "—", codigo: "AVIA-001" },
+    ]
+  },
+  {
+    cidade: "Pousada",
+    codigo_cidade: "POUS",
+    cenarios: [
+      { nome: "POUSADA", numero: "—", codigo: "POUS-001" },
+    ]
+  },
+  {
     cidade: "CC1 – A01 | TRÊS GRAÇAS FT2 – CC CHACRINHA",
     codigo_cidade: "A01",
     cenarios: [
