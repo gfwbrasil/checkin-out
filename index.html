@@ -47,6 +47,15 @@
 
       <form id="form-checkin" onsubmit="return false;">
 
+        <div id="busca-checkin" style="display:none;" class="busca-checkin-block">
+          <p class="dica" style="margin-bottom:8px;">Opcional: busque o check-in para gerar um relatório completo.</p>
+          <div class="busca-row">
+            <input type="number" id="busca-numero" placeholder="Nº da reserva..." min="0" />
+            <button type="button" class="btn-buscar" onclick="buscarCheckin()">Buscar</button>
+          </div>
+          <div id="resultado-busca"></div>
+        </div>
+
         <fieldset>
           <legend>Informações da Reserva</legend>
           <label>Cidade Cenográfica *
@@ -62,8 +71,8 @@
           <label>Código do Cenário
             <input type="text" id="codigo-cenario" readonly placeholder="Preenchido automaticamente" />
           </label>
-          <label>Produto *
-            <input type="text" id="produto" required placeholder="Ex: Microdramas, Altas Horas..." />
+          <label>Número da Reserva *
+            <input type="number" id="numero-reserva" required placeholder="Ex: 12345" min="0" />
           </label>
           <label>Conteúdo *
             <select id="conteudo" required>
@@ -140,6 +149,7 @@
         <button class="btn-voltar" onclick="voltarInicio()">← Voltar</button>
         <h2>Registros Salvos</h2>
       </div>
+      <input type="number" id="busca-registros" class="input-busca-registros" placeholder="Buscar por nº da reserva..." oninput="renderizarRegistros()" />
       <div id="lista-registros"></div>
     </section>
 

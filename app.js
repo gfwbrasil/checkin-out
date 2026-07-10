@@ -1,6 +1,7 @@
 let tipoAtual = 'checkin';
 let fotosBase64 = new Array(10).fill(null);
 let registroEmEdicao = null;
+let checkinVinculado = null;
 
 // ─── NAVEGAÇÃO ────────────────────────────────────────────────
 
@@ -13,6 +14,7 @@ function iniciarFormulario(tipo) {
   tipoAtual = tipo;
   fotosBase64 = new Array(10).fill(null);
   registroEmEdicao = null;
+  checkinVinculado = null;
   configurarFormularioPorTipo(tipo);
   preencherCidades();
   preencherEngenheiros();
@@ -51,6 +53,7 @@ function configurarFormularioPorTipo(tipo) {
 
   document.getElementById('label-obs-checkin').style.display = isCheckin ? '' : 'none';
   document.getElementById('label-obs-checkout').style.display = isCheckin ? 'none' : '';
+  document.getElementById('busca-checkin').style.display = isCheckin ? 'none' : '';
 }
 
 function definirDataHoje() {
@@ -61,6 +64,49 @@ function definirDataHoje() {
     el.min = hoje;
     el.max = hoje;
   });
+}
+
+// ─── BUSCA DE CHECK-IN PARA CHECKOUT ─────────────────────────
+
+function buscarCheckin() {
+  const num = document.getElementById('busca-numero').value.trim();
+  const div = document.getElementById('resultado-busca');
+  if (!num) { div.innerHTML = ''; checkinVinculado = null; return; }
+
+  const registros = JSON.parse(localStorage.getItem('registros') || '[]');
+  const r = registros.find(r => String(r.numero_reserva) === num && r.tipo === 'checkin');
+
+  if (!r) {
+    div.innerHTML = `<p class="resultado-busca-erro">Nenhum check-in encontrado com o nº ${num}.</p>`;
+    checkinVinculado = null;
+    registroEmEdicao = null;
+    return;
+  }
+
+  preencherFormularioComCheckin(r);
+  div.innerHTML = `<p class="resultado-busca-ok">✓ Check-in encontrado: ${r.cenario}</p>`;
+}
+
+function preencherFormularioComCheckin(r) {
+  checkinVinculado = r;
+  registroEmEdicao = r.id;
+
+  document.getElementById('numero-reserva').value = r.numero_reserva || '';
+  document.getElementById('supervisor').value = r.supervisor || '';
+  document.getElementById('engenheiro').value = r.email_engenheiro || '';
+  document.getElementById('conteudo').value = r.conteudo || '';
+
+  const cidadeIdx = BASE_CENARIOS.findIndex(c => c.cidade === r.cidade);
+  if (cidadeIdx >= 0) {
+    document.getElementById('cidade').value = cidadeIdx;
+    carregarCenarios();
+    const cenarios = BASE_CENARIOS[cidadeIdx].cenarios;
+    const cenarioIdx = cenarios.findIndex(c => c.nome === r.cenario);
+    if (cenarioIdx >= 0) {
+      document.getElementById('cenario').value = cenarioIdx;
+      document.getElementById('codigo-cenario').value = cenarios[cenarioIdx].codigo;
+    }
+  }
 }
 
 // ─── CONTEÚDOS E OBSERVAÇÕES ─────────────────────────────────
@@ -146,38 +192,7 @@ function gerarSlotsDefoto() {
   for (let i = 0; i < 10; i++) {
     const slot = document.createElement('div');
     slot.className = 'slot-foto';
-    slot.id = `slot-${i}`;
-    slot.innerHTML = `
-      <input type="file" accept="image/*" capture="environment"
-             id="input-foto-${i}" style="display:none"
-             onchange="carregarFoto(event, ${i})" />
-      <label for="input-foto-${i}" class="label-foto">
-        <span class="num-foto">${i + 1}</span>
-        <span class="icone-add">📷</span>
-      </label>
-    `;
-    grid.appendChild(slot);
-  }
-  atualizarContador();
-}
-
-function carregarFoto(event, idx) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    fotosBase64[idx] = e.target.result;
-    renderizarSlot(idx);
-    atualizarContador();
-  };
-  reader.readAsDataURL(file);
-}
-
-function renderizarSlot(idx) {
-  const slot = document.getElementById(`slot-${idx}`);
-  if (fotosBase64[idx]) {
-    slot.innerHTML = `
-      <img src="${fotosBase64[idx]}" alt="Foto ${idx + 1}" onclick="removerFoto(${idx})" />
+ alt="Foto ${idx + 1}" onclick="removerFoto(${idx})" />
       <button class="btn-remover-foto" onclick="removerFoto(${idx})" title="Remover foto">✕</button>
       <span class="num-foto-sobre">${idx + 1}</span>
     `;
@@ -208,7 +223,7 @@ function atualizarContador() {
 // ─── VALIDAÇÃO ────────────────────────────────────────────────
 
 function validarFormulario() {
-  const campos = ['cidade', 'cenario', 'supervisor', 'engenheiro', 'produto', 'conteudo'];
+  const campos = ['cidade', 'cenario', 'supervisor', 'engenheiro', 'numero-reserva', 'conteudo'];
   for (const id of campos) {
     const el = document.getElementById(id);
     if (!el.value.trim()) {
@@ -231,6 +246,16 @@ function validarFormulario() {
 // ─── COLETA DE DADOS ──────────────────────────────────────────
 
 function coletarDados() {
+  if (checkinVinculado) {
+    return {
+      ...checkinVinculado,
+      tipo: 'completo',
+      fotos_checkout: [...fotosBase64],
+      data_checkout: document.getElementById('data-checkout').value,
+      observacoes_checkout: Array.from(document.getElementById('observacoes-checkout').selectedOptions).map(o => o.value).join(' | '),
+    };
+  }
+
   const cidadeIdx = document.getElementById('cidade').value;
   const cenarioIdx = document.getElementById('cenario').value;
   const cidadeObj = cidadeIdx !== '' ? BASE_CENARIOS[cidadeIdx] : null;
@@ -244,7 +269,7 @@ function coletarDados() {
     cenario: cenarioObj ? cenarioObj.nome : '',
     numero_cenario: cenarioObj ? cenarioObj.numero : '',
     codigo_cenario: cenarioObj ? cenarioObj.codigo : document.getElementById('codigo-cenario').value,
-    produto: document.getElementById('produto').value.trim(),
+    numero_reserva: document.getElementById('numero-reserva').value,
     conteudo: document.getElementById('conteudo').value,
     supervisor: document.getElementById('supervisor').value.trim(),
     engenheiro: (() => { const e = ENGENHEIROS.find(x => x.email === document.getElementById('engenheiro').value); return e ? e.nome : ''; })(),
@@ -308,8 +333,9 @@ function renderizarRelatorio(dados) {
   };
 
   const fotos = (dados.fotos || []).map((f, i) => ({ src: f, idx: i })).filter(f => f.src !== null);
-  const fotosCheckin  = dados.tipo === 'checkin'  ? fotos : [];
-  const fotosCheckout = dados.tipo === 'checkout' ? fotos : [];
+  const fotosCheckoutArr = (dados.fotos_checkout || []).map((f, i) => ({ src: f, idx: i })).filter(f => f.src !== null);
+  const fotosCheckin  = dados.tipo === 'completo' ? fotos : (dados.tipo === 'checkin'  ? fotos : []);
+  const fotosCheckout = dados.tipo === 'completo' ? fotosCheckoutArr : (dados.tipo === 'checkout' ? fotos : []);
 
   const colFotos = (lista) => {
     if (lista.length === 0) return '<td class="col-fotos vazia"></td>';
@@ -335,8 +361,8 @@ function renderizarRelatorio(dados) {
         <tr>
           <td class="pdf-label">Cidade Cenográfica:</td>
           <td class="pdf-valor">${dados.cidade || ''}</td>
-          <td class="pdf-label">CONTEÚDO</td>
-          <td class="pdf-valor">${dados.conteudo || dados.produto || ''}</td>
+          <td class="pdf-label">Nº RESERVA</td>
+          <td class="pdf-valor">${dados.numero_reserva || ''}</td>
         </tr>
         <tr>
           <td class="pdf-label">Cenário:</td>
@@ -357,6 +383,10 @@ function renderizarRelatorio(dados) {
         ${dados.observacoes ? `<tr>
           <td class="pdf-label">Observações:</td>
           <td class="pdf-valor" colspan="3">${dados.observacoes}</td>
+        </tr>` : ''}
+        ${dados.observacoes_checkout ? `<tr>
+          <td class="pdf-label">Obs. Check-out:</td>
+          <td class="pdf-valor" colspan="3">${dados.observacoes_checkout}</td>
         </tr>` : ''}
       </table>
 
@@ -387,16 +417,21 @@ function renderizarRelatorio(dados) {
 function renderizarRegistros() {
   const registros = JSON.parse(localStorage.getItem('registros') || '[]');
   const container = document.getElementById('lista-registros');
+  const busca = (document.getElementById('busca-registros')?.value || '').trim();
 
-  if (registros.length === 0) {
-    container.innerHTML = '<p class="vazio">Nenhum registro salvo ainda.</p>';
+  const filtrados = busca
+    ? registros.filter(r => String(r.numero_reserva || '').includes(busca))
+    : registros;
+
+  if (filtrados.length === 0) {
+    container.innerHTML = `<p class="vazio">${busca ? 'Nenhum registro com este número.' : 'Nenhum registro salvo ainda.'}</p>`;
     return;
   }
 
-  const ordenados = [...registros].sort((a, b) => b.id - a.id);
+  const ordenados = [...filtrados].sort((a, b) => b.id - a.id);
 
   container.innerHTML = ordenados.map(r => {
-    const tipo = r.tipo === 'checkin' ? 'CHECK-IN' : 'CHECK-OUT';
+    const tipo = r.tipo === 'checkin' ? 'CHECK-IN' : r.tipo === 'checkout' ? 'CHECK-OUT' : 'COMPLETO';
     const data = r.tipo === 'checkin' ? r.data_checkin : r.data_checkout;
     const dataFmt = data ? data.split('-').reverse().join('/') : '—';
     const fotos = (r.fotos || []).filter(f => f).length;
@@ -409,6 +444,7 @@ function renderizarRegistros() {
         </div>
         <strong>${r.cenario || '—'}</strong>
         <p>${r.cidade || '—'} · ${r.codigo_cenario || '—'}</p>
+        ${r.numero_reserva ? `<p>Reserva nº ${r.numero_reserva}</p>` : ''}
         <p>Supervisor: ${r.supervisor || '—'}</p>
         <p>${fotos} foto${fotos !== 1 ? 's' : ''}</p>
         <div class="card-acoes">

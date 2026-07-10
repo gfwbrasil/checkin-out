@@ -171,6 +171,7 @@ header {
 }
 .badge.checkin  { background: rgba(100,181,246,0.25); color: var(--checkin); border: 1px solid var(--checkin); }
 .badge.checkout { background: rgba(128,203,196,0.25); color: var(--checkout); border: 1px solid var(--checkout); }
+.badge.completo { background: rgba(167,130,255,0.25); color: #ce93d8; border: 1px solid #ce93d8; }
 .badge.rascunho { background: rgba(255,183,77,0.2); color: #ffb74d; border: 1px solid #ffb74d; }
 .badge.grande   { font-size: 0.82rem; padding: 6px 16px; }
 .badge.pequeno  { font-size: 0.62rem; }
@@ -206,6 +207,7 @@ label:last-child { margin-bottom: 0; }
 
 input[type="text"],
 input[type="date"],
+input[type="number"],
 select,
 textarea {
   width: 100%;
@@ -410,6 +412,36 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) opacit
 }
 
 /* ─── IMPRESSÃO ────────────────────────────────────────────── */
+
+/* ─── BUSCA CHECK-IN ───────────────────────────────────────── */
+.busca-checkin-block {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 14px;
+  backdrop-filter: blur(8px);
+}
+.busca-row { display: flex; gap: 8px; }
+.busca-row input { flex: 1; }
+.btn-buscar {
+  padding: 10px 16px;
+  background: rgba(100,181,246,0.85);
+  color: #0d1b6e;
+  border: none;
+  border-radius: 9px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.resultado-busca-ok  { margin-top: 8px; font-size: 0.83rem; color: #80cbc4; }
+.resultado-busca-erro { margin-top: 8px; font-size: 0.83rem; color: #ef9a9a; }
+
+.input-busca-registros {
+  display: block;
+  width: 100%;
+  margin-bottom: 14px;
+}
 
 /* ─── REGISTROS SALVOS ─────────────────────────────────────── */
 .card-registro {
