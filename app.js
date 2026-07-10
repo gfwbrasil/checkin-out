@@ -1,5 +1,6 @@
 let tipoAtual = 'checkin';
 let fotosBase64 = new Array(10).fill(null);
+let fotosCheckinRef = new Array(10).fill(null);
 let registroEmEdicao = null;
 let checkinVinculado = null;
 
@@ -13,6 +14,7 @@ function mostrarTela(id) {
 function iniciarFormulario(tipo) {
   tipoAtual = tipo;
   fotosBase64 = new Array(10).fill(null);
+  fotosCheckinRef = new Array(10).fill(null);
   registroEmEdicao = null;
   checkinVinculado = null;
   configurarFormularioPorTipo(tipo);
@@ -20,6 +22,7 @@ function iniciarFormulario(tipo) {
   preencherEngenheiros();
   preencherConteudos();
   gerarSlotsDefoto();
+  gerarSlotsCheckinRef();
   definirDataHoje();
   mostrarTela('tela-formulario');
 }
@@ -54,6 +57,8 @@ function configurarFormularioPorTipo(tipo) {
   document.getElementById('label-obs-checkin').style.display = isCheckin ? '' : 'none';
   document.getElementById('label-obs-checkout').style.display = isCheckin ? 'none' : '';
   document.getElementById('busca-checkin').style.display = isCheckin ? 'none' : '';
+  document.getElementById('fieldset-fotos-checkin-ref').style.display = isCheckin ? 'none' : '';
+  document.getElementById('legend-fotos').childNodes[0].textContent = isCheckin ? 'Registro Fotográfico ' : 'Fotos do Check-out ';
 }
 
 function definirDataHoje() {
@@ -107,6 +112,10 @@ function preencherFormularioComCheckin(r) {
       document.getElementById('codigo-cenario').value = cenarios[cenarioIdx].codigo;
     }
   }
+
+  fotosCheckinRef = [...(r.fotos || new Array(10).fill(null))];
+  for (let i = 0; i < 10; i++) renderizarSlotCheckin(i);
+  atualizarContadorCheckin();
 }
 
 // ─── CONTEÚDOS E OBSERVAÇÕES ─────────────────────────────────
@@ -207,6 +216,72 @@ function gerarSlotsDefoto() {
   atualizarContador();
 }
 
+function gerarSlotsCheckinRef() {
+  const grid = document.getElementById('grid-fotos-checkin');
+  grid.innerHTML = '';
+  for (let i = 0; i < 10; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'slot-foto';
+    slot.id = `slot-ck-${i}`;
+    slot.innerHTML = `
+      <input type="file" accept="image/*" capture="environment"
+             id="input-foto-ck-${i}" style="display:none"
+             onchange="carregarFotoCheckin(event, ${i})" />
+      <label for="input-foto-ck-${i}" class="label-foto">
+        <span class="num-foto">${i + 1}</span>
+        <span class="icone-add">📷</span>
+      </label>
+    `;
+    grid.appendChild(slot);
+  }
+  atualizarContadorCheckin();
+}
+
+function carregarFotoCheckin(event, idx) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    fotosCheckinRef[idx] = e.target.result;
+    renderizarSlotCheckin(idx);
+    atualizarContadorCheckin();
+  };
+  reader.readAsDataURL(file);
+}
+
+function renderizarSlotCheckin(idx) {
+  const slot = document.getElementById(`slot-ck-${idx}`);
+  if (!slot) return;
+  if (fotosCheckinRef[idx]) {
+    slot.innerHTML = `
+      <img src="${fotosCheckinRef[idx]}" alt="Check-in ${idx + 1}" onclick="removerFotoCheckin(${idx})" />
+      <button class="btn-remover-foto" onclick="removerFotoCheckin(${idx})" title="Remover">✕</button>
+      <span class="num-foto-sobre">${idx + 1}</span>
+    `;
+  } else {
+    slot.innerHTML = `
+      <input type="file" accept="image/*" capture="environment"
+             id="input-foto-ck-${idx}" style="display:none"
+             onchange="carregarFotoCheckin(event, ${idx})" />
+      <label for="input-foto-ck-${idx}" class="label-foto">
+        <span class="num-foto">${idx + 1}</span>
+        <span class="icone-add">📷</span>
+      </label>
+    `;
+  }
+}
+
+function removerFotoCheckin(idx) {
+  fotosCheckinRef[idx] = null;
+  renderizarSlotCheckin(idx);
+  atualizarContadorCheckin();
+}
+
+function atualizarContadorCheckin() {
+  const el = document.getElementById('contador-checkin');
+  if (el) el.textContent = `${fotosCheckinRef.filter(f => f !== null).length}/10`;
+}
+
 function carregarFoto(event, idx) {
   const file = event.target.files[0];
   if (!file) return;
@@ -281,6 +356,7 @@ function coletarDados() {
     return {
       ...checkinVinculado,
       tipo: 'completo',
+      fotos_checkin_ref: [...fotosCheckinRef],
       fotos_checkout: [...fotosBase64],
       data_checkout: document.getElementById('data-checkout').value,
       observacoes_checkout: Array.from(document.getElementById('observacoes-checkout').selectedOptions).map(o => o.value).join(' | '),
@@ -311,6 +387,7 @@ function coletarDados() {
       ? Array.from(document.getElementById('observacoes-checkout').selectedOptions).map(o => o.value).join(' | ')
       : document.getElementById('observacoes').value.trim(),
     fotos: [...fotosBase64],
+    fotos_checkin_ref: tipoAtual === 'checkout' ? [...fotosCheckinRef] : [],
     criado_em: new Date().toISOString()
   };
 }
@@ -363,10 +440,22 @@ function renderizarRelatorio(dados) {
     return `${d}/${m}/${y}`;
   };
 
-  const fotos = (dados.fotos || []).map((f, i) => ({ src: f, idx: i })).filter(f => f.src !== null);
-  const fotosCheckoutArr = (dados.fotos_checkout || []).map((f, i) => ({ src: f, idx: i })).filter(f => f.src !== null);
-  const fotosCheckin  = dados.tipo === 'completo' ? fotos : (dados.tipo === 'checkin'  ? fotos : []);
-  const fotosCheckout = dados.tipo === 'completo' ? fotosCheckoutArr : (dados.tipo === 'checkout' ? fotos : []);
+  const toList = (arr) => (arr || []).map((f, i) => ({ src: f, idx: i })).filter(f => f.src !== null);
+  const fotos           = toList(dados.fotos);
+  const fotosCheckoutArr = toList(dados.fotos_checkout);
+  const fotosCheckinRefArr = toList(dados.fotos_checkin_ref);
+
+  let fotosCheckin, fotosCheckout;
+  if (dados.tipo === 'completo') {
+    fotosCheckin  = fotos;           // fotos originais do check-in vinculado
+    fotosCheckout = fotosCheckoutArr; // fotos adicionadas no checkout
+  } else if (dados.tipo === 'checkout') {
+    fotosCheckin  = fotosCheckinRefArr; // fotos de referência do check-in (coluna esquerda)
+    fotosCheckout = fotos;              // fotos do checkout (coluna direita)
+  } else {
+    fotosCheckin  = fotos;
+    fotosCheckout = [];
+  }
 
   const colFotos = (lista) => {
     if (lista.length === 0) return '<td class="col-fotos vazia"></td>';
