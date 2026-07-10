@@ -192,7 +192,38 @@ function gerarSlotsDefoto() {
   for (let i = 0; i < 10; i++) {
     const slot = document.createElement('div');
     slot.className = 'slot-foto';
- alt="Foto ${idx + 1}" onclick="removerFoto(${idx})" />
+    slot.id = `slot-${i}`;
+    slot.innerHTML = `
+      <input type="file" accept="image/*" capture="environment"
+             id="input-foto-${i}" style="display:none"
+             onchange="carregarFoto(event, ${i})" />
+      <label for="input-foto-${i}" class="label-foto">
+        <span class="num-foto">${i + 1}</span>
+        <span class="icone-add">📷</span>
+      </label>
+    `;
+    grid.appendChild(slot);
+  }
+  atualizarContador();
+}
+
+function carregarFoto(event, idx) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    fotosBase64[idx] = e.target.result;
+    renderizarSlot(idx);
+    atualizarContador();
+  };
+  reader.readAsDataURL(file);
+}
+
+function renderizarSlot(idx) {
+  const slot = document.getElementById(`slot-${idx}`);
+  if (fotosBase64[idx]) {
+    slot.innerHTML = `
+      <img src="${fotosBase64[idx]}" alt="Foto ${idx + 1}" onclick="removerFoto(${idx})" />
       <button class="btn-remover-foto" onclick="removerFoto(${idx})" title="Remover foto">✕</button>
       <span class="num-foto-sobre">${idx + 1}</span>
     `;
