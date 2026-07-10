@@ -64,18 +64,60 @@ header {
 .tela.ativa { display: block; }
 
 /* ─── TELA INICIAL ─────────────────────────────────────────── */
+
+/* Silhueta de smartphone */
+.phone-frame {
+  width: 200px;
+  aspect-ratio: 9 / 19;
+  margin: 14px auto 0;
+  position: relative;
+  background: rgba(255,255,255,0.06);
+  border: 2.5px solid rgba(255,255,255,0.22);
+  border-radius: 32px;
+  box-shadow:
+    0 28px 56px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.12);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  padding: 52px 16px 34px;
+  gap: 14px;
+}
+/* Dynamic Island */
+.phone-frame::before {
+  content: '';
+  position: absolute;
+  top: 14px; left: 50%;
+  transform: translateX(-50%);
+  width: 52px; height: 10px;
+  background: rgba(0,0,0,0.55);
+  border-radius: 8px;
+  border: 1.5px solid rgba(255,255,255,0.1);
+}
+/* Barra home */
+.phone-frame::after {
+  content: '';
+  position: absolute;
+  bottom: 10px; left: 50%;
+  transform: translateX(-50%);
+  width: 50px; height: 4px;
+  background: rgba(255,255,255,0.28);
+  border-radius: 2px;
+}
+
 .card-opcoes {
   display: flex;
   justify-content: center;
-  gap: 20px;
-  margin: 14px 0 10px;
+  gap: 14px;
+  margin: 0;
 }
 
 .btn-tipo {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0;
+  gap: 6px;
   padding: 10px;
   border: 1px solid var(--card-border);
   border-radius: var(--radius);
@@ -94,6 +136,7 @@ header {
 .btn-tipo .icone { font-size: 1.4rem; }
 .btn-tipo strong { font-size: 0.88rem; letter-spacing: .04em; }
 .btn-tipo small  { font-size: 0.70rem; color: var(--text-muted); }
+.btn-tipo-label  { font-size: 0.60rem; font-weight: 700; letter-spacing: .07em; opacity: .85; }
 
 /* ─── BOTÕES GERAIS ────────────────────────────────────────── */
 .btn-primario {

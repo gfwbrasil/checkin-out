@@ -23,29 +23,34 @@
 
     <!-- TELA INICIAL -->
     <section id="tela-inicio" class="tela ativa">
-      <div class="card-opcoes">
-        <button class="btn-tipo check-in" onclick="iniciarFormulario('checkin')" aria-label="Check-in">
-          <!-- câmera + seta entrando (←) -->
-          <svg width="54" viewBox="0 0 70 56" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="22" width="40" height="30" rx="7"/>
-            <path d="M15 22v-6a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v6"/>
-            <circle cx="22" cy="37" r="9"/>
-            <line x1="68" y1="12" x2="50" y2="12"/>
-            <polyline points="57 6 48 12 57 18"/>
-          </svg>
-        </button>
-        <button class="btn-tipo check-out" onclick="iniciarFormulario('checkout')" aria-label="Check-out">
-          <!-- câmera + seta saindo (→) -->
-          <svg width="54" viewBox="0 0 70 56" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="22" width="40" height="30" rx="7"/>
-            <path d="M15 22v-6a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v6"/>
-            <circle cx="22" cy="37" r="9"/>
-            <line x1="48" y1="12" x2="66" y2="12"/>
-            <polyline points="59 6 68 12 59 18"/>
-          </svg>
-        </button>
+      <div class="phone-frame">
+
+        <div class="card-opcoes">
+          <button class="btn-tipo check-in" onclick="iniciarFormulario('checkin')" aria-label="Check-in">
+            <svg width="54" viewBox="0 0 70 56" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="22" width="40" height="30" rx="7"/>
+              <path d="M15 22v-6a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v6"/>
+              <circle cx="22" cy="37" r="9"/>
+              <line x1="68" y1="12" x2="50" y2="12"/>
+              <polyline points="57 6 48 12 57 18"/>
+            </svg>
+            <span class="btn-tipo-label">CHECK-IN</span>
+          </button>
+          <button class="btn-tipo check-out" onclick="iniciarFormulario('checkout')" aria-label="Check-out">
+            <svg width="54" viewBox="0 0 70 56" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="22" width="40" height="30" rx="7"/>
+              <path d="M15 22v-6a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v6"/>
+              <circle cx="22" cy="37" r="9"/>
+              <line x1="48" y1="12" x2="66" y2="12"/>
+              <polyline points="59 6 68 12 59 18"/>
+            </svg>
+            <span class="btn-tipo-label">CHECK-OUT</span>
+          </button>
+        </div>
+
+        <button class="btn-secundario" onclick="verRegistros()">📁 Ver registros salvos</button>
+
       </div>
-      <button class="btn-secundario" onclick="verRegistros()">📁 Ver registros salvos</button>
     </section>
 
     <!-- FORMULÁRIO -->
@@ -171,7 +176,7 @@
 
   <div class="barra-colorida"></div>
 
-  <script src="dados.js?v=11"></script>
-  <script src="app.js?v=11"></script>
+  <script src="dados.js?v=12"></script>
+  <script src="app.js?v=12"></script>
 </body>
 </html>
