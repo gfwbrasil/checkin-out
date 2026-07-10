@@ -217,27 +217,36 @@ function comprimirFoto(base64) {
       const srcH = img.naturalHeight || img.height;
       const portrait = srcH > srcW;
 
-      // Always output landscape: swap dimensions for portrait photos
-      let cw = portrait ? srcH : srcW;
-      let ch = portrait ? srcW : srcH;
+      // Always output 16:9 landscape
+      const TW = MAX, TH = Math.round(MAX * 9 / 16); // 1200×675
 
-      // Scale down to max dimension
-      const scale = Math.min(1, MAX / cw);
-      cw = Math.round(cw * scale);
-      ch = Math.round(ch * scale);
+      // Effective landscape dimensions after potential rotation
+      const effW = portrait ? srcH : srcW;
+      const effH = portrait ? srcW : srcH;
 
-      const canvas = document.createElement('canvas');
-      canvas.width = cw; canvas.height = ch;
-      const ctx = canvas.getContext('2d');
+      // Scale to cover TW×TH, then center-crop
+      const scale = Math.max(TW / effW, TH / effH);
+      const scaledW = Math.round(effW * scale);
+      const scaledH = Math.round(effH * scale);
+      const ox = Math.round((scaledW - TW) / 2);
+      const oy = Math.round((scaledH - TH) / 2);
 
+      // Step 1: draw full (rotated) image on intermediate canvas
+      const tmp = document.createElement('canvas');
+      tmp.width = scaledW; tmp.height = scaledH;
+      const tctx = tmp.getContext('2d');
       if (portrait) {
-        // Rotate 90° CW so portrait becomes landscape
-        ctx.translate(cw, 0);
-        ctx.rotate(Math.PI / 2);
-        ctx.drawImage(img, 0, 0, ch, cw);
+        tctx.translate(scaledW, 0);
+        tctx.rotate(Math.PI / 2);
+        tctx.drawImage(img, 0, 0, scaledH, scaledW);
       } else {
-        ctx.drawImage(img, 0, 0, cw, ch);
+        tctx.drawImage(img, 0, 0, scaledW, scaledH);
       }
+
+      // Step 2: center-crop onto final 16:9 canvas
+      const canvas = document.createElement('canvas');
+      canvas.width = TW; canvas.height = TH;
+      canvas.getContext('2d').drawImage(tmp, ox, oy, TW, TH, 0, 0, TW, TH);
 
       resolve(canvas.toDataURL('image/jpeg', 0.75));
     };
