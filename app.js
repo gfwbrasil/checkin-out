@@ -213,16 +213,35 @@ function comprimirFoto(base64) {
     const img = new Image();
     img.onload = () => {
       const MAX = 1200;
-      let w = img.width, h = img.height;
-      if (w > MAX || h > MAX) {
-        if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
-        else       { w = Math.round(w * MAX / h); h = MAX; }
-      }
+      const srcW = img.naturalWidth || img.width;
+      const srcH = img.naturalHeight || img.height;
+      const portrait = srcH > srcW;
+
+      // Always output landscape: swap dimensions for portrait photos
+      let cw = portrait ? srcH : srcW;
+      let ch = portrait ? srcW : srcH;
+
+      // Scale down to max dimension
+      const scale = Math.min(1, MAX / cw);
+      cw = Math.round(cw * scale);
+      ch = Math.round(ch * scale);
+
       const canvas = document.createElement('canvas');
-      canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      canvas.width = cw; canvas.height = ch;
+      const ctx = canvas.getContext('2d');
+
+      if (portrait) {
+        // Rotate 90° CW so portrait becomes landscape
+        ctx.translate(cw, 0);
+        ctx.rotate(Math.PI / 2);
+        ctx.drawImage(img, 0, 0, ch, cw);
+      } else {
+        ctx.drawImage(img, 0, 0, cw, ch);
+      }
+
       resolve(canvas.toDataURL('image/jpeg', 0.75));
     };
+    img.onerror = () => resolve(base64);
     img.src = base64;
   });
 }

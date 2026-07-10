@@ -252,12 +252,12 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) opacit
 
 .grid-fotos {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
 }
 
 .slot-foto {
-  aspect-ratio: 1;
+  aspect-ratio: 4 / 3;
   border-radius: 9px;
   overflow: hidden;
   position: relative;
@@ -512,6 +512,6 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) opacit
 
 /* ─── MOBILE REFINEMENTS ───────────────────────────────────── */
 @media (max-width: 360px) {
-  .grid-fotos { grid-template-columns: repeat(4, 1fr); }
+  .grid-fotos { grid-template-columns: repeat(2, 1fr); }
   .card-opcoes { grid-template-columns: 1fr; }
 }
