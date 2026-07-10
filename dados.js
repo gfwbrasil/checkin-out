@@ -246,13 +246,13 @@ const OBSERVACOES_CHECKOUT = [
 ];
 
 const ENGENHEIROS = [
-  { nome: "Jorge Henrique Silva", email: "jorge.henrique.silva@g.globo" },
-  { nome: "Jairo Pama",           email: "jairo.pama@g.globo" },
+  { nome: "Ana Damasceno",        email: "ana.damasceno@g.globo" },
+  { nome: "Francisco Tairone",    email: "francisco.tairone@g.globo" },
+  { nome: "Gabriela Brasil",      email: "gabriela.brasil@g.globo" },
   { nome: "Igor Foliveira",       email: "igor.foliveira@g.globo" },
-  { nome: "Julianna Pimentel",   email: "julianna.pimentel@g.globo" },
+  { nome: "Jairo Pama",           email: "jairo.pama@g.globo" },
+  { nome: "Jorge Henrique Silva", email: "jorge.henrique.silva@g.globo" },
+  { nome: "Julianna Pimentel",    email: "julianna.pimentel@g.globo" },
   { nome: "Raphael Lima",         email: "raphael.lima@g.globo" },
   { nome: "Vanessa Silva",        email: "vanessa.ssilva@g.globo" },
-  { nome: "Francisco Tairone",    email: "francisco.tairone@g.globo" },
-  { nome: "Ana Damasceno",        email: "ana.damasceno@g.globo" },
-  { nome: "Gabriela Brasil",      email: "gabriela.brasil@g.globo" },
 ];
